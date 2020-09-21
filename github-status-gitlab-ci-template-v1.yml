@@ -1,0 +1,34 @@
+.github_publish_build_status:
+  image:
+    name: registry.gitlab.sensirion.lokal/sensirion/docker/docker-ubuntu:18.04-1.2.0
+  tags: [docker, linux]
+  script:
+  - >
+    curl
+    -f
+    -H "Authorization: token $TESTBED_GITHUB_TOKEN"
+    -H "Content-Type: application/json"
+    -d "{\"state\":\"$PUBLISH_STATE\",\"description\":\"$PUBLISH_DESCRIPTION\",\"context\":\"ci/internal-ci\"}"
+    https://api.github.com/repos/sensirion/$GITHUB_PROJECT_NAME/statuses/$CI_COMMIT_SHA
+  except:
+    variables:
+      - $CI_COMMIT_REF_NAME =~ /^internal\//
+
+.github_publish_pending:
+  extends: .github_publish_build_status
+  variables:
+    PUBLISH_STATE: "pending"
+    PUBLISH_DESCRIPTION: "Waiting for internal tests to finish"
+
+.github_publish_success:
+  extends: .github_publish_build_status
+  variables:
+    PUBLISH_STATE: "success"
+    PUBLISH_DESCRIPTION: "The internal tests succeeded"
+
+.github_publish_failure:
+  extends: .github_publish_build_status
+  when: on_failure
+  variables:
+    PUBLISH_STATE: "failure"
+    PUBLISH_DESCRIPTION: "The internal tests failed"

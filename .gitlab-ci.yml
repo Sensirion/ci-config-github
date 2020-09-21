@@ -1,0 +1,17 @@
+include:
+  - local: github-status-gitlab-ci-template-v1.yml
+
+variables:
+  GITHUB_PROJECT_NAME: ci-config-github
+
+stages:
+  - publish_build_pending
+  - publish_build_status
+
+publish_pending:
+  extends: .github_publish_pending
+  stage: publish_build_pending
+
+publish_success:
+  extends: .github_publish_success
+  stage: publish_build_status
